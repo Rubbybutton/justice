@@ -1,0 +1,51 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"runtime"
+)
+
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
+
+func genHosts(hosts []string) string {
+	res := ""
+	for _, host := range hosts {
+		res += "127.0.0.1 " + host + "\n"
+	}
+	return res
+}
+
+func main() {
+
+	var bannedHost = []string{"www.google.com", "www.google.cn", "www.google.hk", "www.google.com.hk",
+		"www.baidu.com",
+		"www.bing.com", "cn.bing.com",
+		"duckduckgo.com", "www.duckduck.com"}
+	// bannedHost := []string{"www.baidu.com"}
+	hostsPath := ""
+	switch runtime.GOOS {
+	case "windows":
+		hostsPath = "C:\\Windows\\System32\\drivers\\etc\\hosts"
+	case "darwin":
+		hostsPath = "/etc/hosts"
+	case "linux":
+		hostsPath = "/etc/hosts"
+	}
+
+	hostsStr := genHosts(bannedHost)
+
+	filePath := hostsPath
+	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_APPEND, 0666)
+	check(err)
+	defer file.Close()
+	write := bufio.NewWriter(file)
+	write.WriteString(hostsStr)
+	write.Flush()
+	fmt.Println("Done")
+}
